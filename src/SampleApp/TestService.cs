@@ -23,7 +23,7 @@ namespace SampleApp {
             var eventData = new EventData(
                 Uuid.NewUuid(),
                 "some-event",
-                Encoding.UTF8.GetBytes("{\"id\": \"1\" \"value\": \"some value\"}")
+                Encoding.UTF8.GetBytes("{\"id\": \"1\", \"value\": \"some value\"}")
             );
 
             _logger.LogInformation("Writing an event...");
@@ -31,9 +31,7 @@ namespace SampleApp {
             await _client.AppendToStreamAsync(
                 "some-stream",
                 StreamState.NoStream,
-                new List<EventData> {
-                    eventData
-                },
+                new List<EventData> {eventData},
                 cancellationToken: cancellationToken
             );
 

@@ -8,95 +8,86 @@ services:
     command: >
       -c "es-gencert-cli create-ca -out /tmp/ca &&
           es-gencert-cli create-node -ca-certificate /tmp/ca/ca.crt -ca-key /tmp/ca/ca.key -out \
-          /tmp/node1 -ip-addresses 127.0.0.1,172.30.240.11 -dns-names node1.eventstoredb.local &&
+          /tmp/node1 -ip-addresses 127.0.0.1,172.30.240.11 &&
           es-gencert-cli create-node -ca-certificate /tmp/ca/ca.crt -ca-key /tmp/ca/ca.key -out \
-          /tmp/node2 -ip-addresses 127.0.0.1,172.30.240.12 -dns-names node2.eventstoredb.local &&
+          /tmp/node2 -ip-addresses 127.0.0.1,172.30.240.12 &&
           es-gencert-cli create-node -ca-certificate /tmp/ca/ca.crt -ca-key /tmp/ca/ca.key -out \
-          /tmp/node3 -ip-addresses 127.0.0.1,172.30.240.13 -dns-names node3.eventstoredb.local"
+          /tmp/node3 -ip-addresses 127.0.0.1,172.30.240.13"
     volumes:
-    - "./certs:/tmp"
+      - "./certs:/tmp"
 
   esdb-node1:
-    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.48-buster-slim
+    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.54-buster-slim
     env_file:
       - shared.env
     environment:
-      - EVENTSTORE_GOSSIP_SEED=node2.eventstoredb.local:2114,node3.eventstoredb.local:2115
+      - EVENTSTORE_GOSSIP_SEED=172.30.240.12:2113,172.30.240.13:2113
       - EVENTSTORE_INT_IP=172.30.240.11
-      - EVENTSTORE_EXT_HOST_ADVERTISE_AS=node1.eventstoredb.local
-      - EVENTSTORE_HTTP_PORT=2113
-      - EVENTSTORE_EXT_TCP_PORT=1113
       - EVENTSTORE_CERTIFICATE_FILE=/certs/node1/node.crt
       - EVENTSTORE_CERTIFICATE_PRIVATE_KEY_FILE=/certs/node1/node.key
+      - EVENTSTORE_ADVERTISE_HOST_TO_CLIENT_AS=127.0.0.1
+      - EVENTSTORE_ADVERTISE_HTTP_PORT_TO_CLIENT_AS=2111
+      - EVENTSTORE_ADVERTISE_TCP_PORT_TO_CLIENT_AS=1111
     ports:
-      - 1113:1113
-      - 2113:2113
-    hostname: node1.eventstoredb.local
+      - 1111:1113
+      - 2111:2113
     networks:
       clusternetwork:
-        aliases: 
-          - node1.eventstoredb.local
         ipv4_address: 172.30.240.11
     volumes:
       - ./certs:/certs
     restart: unless-stopped
-    depends_on: 
+    depends_on:
       - cert-gen
-       
+
   esdb-node2:
-    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.48-buster-slim
+    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.54-buster-slim
     env_file:
       - shared.env
     environment:
-      - EVENTSTORE_GOSSIP_SEED=node1.eventstoredb.local:2113,node3.eventstoredb.local:2115
+      - EVENTSTORE_GOSSIP_SEED=172.30.240.11:2113,172.30.240.13:2113
       - EVENTSTORE_INT_IP=172.30.240.12
-      - EVENTSTORE_EXT_HOST_ADVERTISE_AS=node2.eventstoredb.local
-      - EVENTSTORE_HTTP_PORT=2114
-      - EVENTSTORE_EXT_TCP_PORT=1114
       - EVENTSTORE_CERTIFICATE_FILE=/certs/node2/node.crt
       - EVENTSTORE_CERTIFICATE_PRIVATE_KEY_FILE=/certs/node2/node.key
+      - EVENTSTORE_ADVERTISE_HOST_TO_CLIENT_AS=127.0.0.1
+      - EVENTSTORE_ADVERTISE_HTTP_PORT_TO_CLIENT_AS=2112
+      - EVENTSTORE_ADVERTISE_TCP_PORT_TO_CLIENT_AS=1112
     ports:
-      - 1114:1114
-      - 2114:2114
-    hostname: node2.eventstoredb.local
+      - 1112:1113
+      - 2112:2113
     networks:
       clusternetwork:
-        aliases: 
-          - node2.eventstoredb.local
         ipv4_address: 172.30.240.12
     volumes:
       - ./certs:/certs
     restart: unless-stopped
-    depends_on: 
+    depends_on:
       - cert-gen
-       
+
   esdb-node3:
-    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.48-buster-slim
+    image: docker.pkg.github.com/eventstore/eventstore/eventstore:20.6.1-alpha.0.54-buster-slim
     env_file:
       - shared.env
     environment:
-      - EVENTSTORE_GOSSIP_SEED=node1.eventstoredb.local:2113,node2.eventstoredb.local:2114
+      - EVENTSTORE_GOSSIP_SEED=172.30.240.11:2113,172.30.240.12:2113
       - EVENTSTORE_INT_IP=172.30.240.13
-      - EVENTSTORE_EXT_HOST_ADVERTISE_AS=node3.eventstoredb.local
-      - EVENTSTORE_HTTP_PORT=2115
-      - EVENTSTORE_EXT_TCP_PORT=1115
       - EVENTSTORE_CERTIFICATE_FILE=/certs/node3/node.crt
       - EVENTSTORE_CERTIFICATE_PRIVATE_KEY_FILE=/certs/node3/node.key
+      - EVENTSTORE_ADVERTISE_HOST_TO_CLIENT_AS=127.0.0.1
+      - EVENTSTORE_ADVERTISE_HTTP_PORT_TO_CLIENT_AS=2113
+      - EVENTSTORE_ADVERTISE_TCP_PORT_TO_CLIENT_AS=1113
     ports:
-      - 1115:1115
-      - 2115:2115
-    hostname: node3.eventstoredb.local
+      - 1113:1113
+      - 2113:2113
     networks:
       clusternetwork:
-        aliases: 
-          - node3.eventstoredb.local
         ipv4_address: 172.30.240.13
     volumes:
       - ./certs:/certs
     restart: unless-stopped
-    depends_on: 
+    depends_on:
       - cert-gen
-  
+
 networks:
   clusternetwork:
     name: eventstoredb.local
@@ -104,4 +95,4 @@ networks:
     ipam:
       driver: default
       config:
-      - subnet: 172.30.240.0/24
+        - subnet: 172.30.240.0/24

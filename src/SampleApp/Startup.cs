@@ -32,19 +32,12 @@ namespace SampleApp {
         }
 
         static EventStoreClient ConfigureEventStoreDBClient(ILoggerFactory loggerFactory) {
-            // var loopback = IPAddress.Loopback;
-
             var settings = new EventStoreClientSettings {
                 ConnectivitySettings = {
-                    // DnsGossipSeeds = new[] {
-                    //     new DnsEndPoint("node1.eventstoredb.local", 2113),
-                    //     new DnsEndPoint("node2.eventstoredb.local", 2114),
-                    //     new DnsEndPoint("node3.eventstoredb.local", 2115),
-                    // }
                     DnsGossipSeeds = new [] {
-                        new DnsEndPoint("node1.eventstore", 1114), 
-                        new DnsEndPoint("node2.eventstore", 2114), 
-                        new DnsEndPoint("node3.eventstore", 3114), 
+                        new DnsEndPoint("localhost", 2111), 
+                        new DnsEndPoint("localhost", 2112), 
+                        new DnsEndPoint("localhost", 2113)
                     }
                         
                 },
